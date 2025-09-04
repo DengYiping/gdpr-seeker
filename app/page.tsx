@@ -1,3 +1,5 @@
+import EarlyAccessForm from "./components/EarlyAccessForm";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-neutral-900">
@@ -126,17 +128,7 @@ export default function Home() {
                 <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Start your GDPR request in minutes</h2>
                 <p className="mt-3 text-white/80 text-sm sm:text-base">Use our guided builder to generate and send requests to any company. Track responses and store exports securely.</p>
               </div>
-              <form className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                <input
-                  type="email"
-                  inputMode="email"
-                  placeholder="Enter your email"
-                  className="w-full rounded-md px-4 py-3 text-sm text-neutral-900 border border-white/20 placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
-                />
-                <button type="button" className="inline-flex items-center justify-center rounded-md bg-white text-black px-5 py-3 text-sm font-medium hover:bg-neutral-100">
-                  Get early access
-                </button>
-              </form>
+              <EarlyAccessForm />
             </div>
           </div>
         </section>
