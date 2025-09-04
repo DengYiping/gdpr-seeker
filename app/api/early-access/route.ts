@@ -10,13 +10,6 @@ function isValidEmail(email: string): boolean {
   return re.test(email);
 }
 
-async function ensureSchema() {
-  // Use raw SQL once to ensure table exists; Drizzle does not create tables automatically.
-  await getRawClient().execute(
-    "CREATE TABLE IF NOT EXISTS early_access_emails (email TEXT PRIMARY KEY, created_at TEXT NOT NULL)"
-  );
-}
-
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -25,7 +18,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
     }
 
-    await ensureSchema();
     const now = new Date().toISOString();
 
     // Try insert; ignore if exists
