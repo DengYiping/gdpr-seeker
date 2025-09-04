@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "drizzle:gen": "drizzle-kit generate --config=drizzle.config.ts",
-    "drizzle:migrate": "node ./scripts/migrate.mjs"
+    "drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.14",
@@ -24,6 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.2",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",

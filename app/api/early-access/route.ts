@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, getRawClient } from "@/db";
-import { earlyAccessEmails, type EarlyAccessEmail } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { type EarlyAccessEmail } from "@/db/schema";
+import { insertEarlyAccessEmail, getEarlyAccessEmail } from "@/db/queries/earlyAccess";
 
 export const runtime = "nodejs";
 
@@ -20,19 +19,8 @@ export async function POST(request: Request) {
 
     const now = new Date().toISOString();
 
-    // Try insert; ignore if exists
-    const result = await getRawClient().execute({
-      sql: "INSERT OR IGNORE INTO early_access_emails (email, created_at) VALUES (?1, ?2)",
-      args: [email, now],
-    });
-
-    const created = Number(result?.rowsAffected ?? 0) === 1;
-
-    const rows: EarlyAccessEmail[] = await db()
-      .select()
-      .from(earlyAccessEmails)
-      .where(eq(earlyAccessEmails.email, email));
-    const record = rows[0];
+    const created = await insertEarlyAccessEmail(email, now);
+    const record: EarlyAccessEmail | undefined = await getEarlyAccessEmail(email);
     return NextResponse.json(
       {
         ok: true,
