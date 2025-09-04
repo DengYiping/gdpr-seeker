@@ -35,8 +35,9 @@ export default function EarlyAccessForm() {
       }
       setStatus({ state: "success", created: Boolean(data?.created) });
       setEmail("");
-    } catch (err: any) {
-      setStatus({ state: "error", message: err?.message || "Something went wrong" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setStatus({ state: "error", message });
     }
   }
 

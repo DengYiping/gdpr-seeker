@@ -1,5 +1,7 @@
-import { createClient } from "@libsql/client";
 import { NextResponse } from "next/server";
+import { db, getRawClient } from "@/db";
+import { earlyAccessEmails, type EarlyAccessEmail } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
@@ -8,18 +10,9 @@ function isValidEmail(email: string): boolean {
   return re.test(email);
 }
 
-async function getClient() {
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-  if (!url || !authToken) {
-    throw new Error("Turso env vars missing: TURSO_DATABASE_URL/TURSO_AUTH_TOKEN");
-  }
-  return createClient({ url, authToken });
-}
-
 async function ensureSchema() {
-  const client = await getClient();
-  await client.execute(
+  // Use raw SQL once to ensure table exists; Drizzle does not create tables automatically.
+  await getRawClient().execute(
     "CREATE TABLE IF NOT EXISTS early_access_emails (email TEXT PRIMARY KEY, created_at TEXT NOT NULL)"
   );
 }
@@ -33,32 +26,33 @@ export async function POST(request: Request) {
     }
 
     await ensureSchema();
-    const client = await getClient();
-
     const now = new Date().toISOString();
-    const insert = await client.execute({
+
+    // Try insert; ignore if exists
+    const result = await getRawClient().execute({
       sql: "INSERT OR IGNORE INTO early_access_emails (email, created_at) VALUES (?1, ?2)",
       args: [email, now],
     });
 
-    const created = (insert as any)?.rowsAffected === 1;
-    const row = await client.execute({
-      sql: "SELECT email, created_at FROM early_access_emails WHERE email = ?1",
-      args: [email],
-    });
+    const created = Number(result?.rowsAffected ?? 0) === 1;
 
-    const record = row.rows?.[0] as any;
+    const rows: EarlyAccessEmail[] = await db()
+      .select()
+      .from(earlyAccessEmails)
+      .where(eq(earlyAccessEmails.email, email));
+    const record = rows[0];
     return NextResponse.json(
       {
         ok: true,
         created,
         email: record?.email ?? email,
-        createdAt: record?.created_at ?? now,
+        createdAt: record?.createdAt ?? now,
       },
       { status: created ? 201 : 200 }
     );
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Unexpected error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unexpected error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
