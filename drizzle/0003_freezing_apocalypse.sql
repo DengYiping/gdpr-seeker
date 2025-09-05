@@ -1,0 +1,1 @@
+ALTER TABLE `gdpr-seeker_company` ADD `verified` integer DEFAULT false NOT NULL;

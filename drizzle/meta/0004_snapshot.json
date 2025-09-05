@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6d4af75d-fe90-4728-be81-52c6e6a474a6",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "4d0d37e1-833b-4074-8b7e-73575e01027e",
+  "prevId": "7b556b5b-94c7-4ccc-8025-737982c07c33",
   "tables": {
     "gdpr-seeker_account": {
       "name": "gdpr-seeker_account",
@@ -121,8 +121,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "gdpr-seeker_post": {
-      "name": "gdpr-seeker_post",
+    "gdpr-seeker_company": {
+      "name": "gdpr-seeker_company",
       "columns": {
         "id": {
           "name": "id",
@@ -133,13 +133,238 @@
         },
         "name": {
           "name": "name",
-          "type": "text(256)",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "domain": {
+          "name": "domain",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "gdprEmail": {
+          "name": "gdprEmail",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "verified": {
+          "name": "verified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        }
+      },
+      "indexes": {
+        "company_name_idx": {
+          "name": "company_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
         },
-        "createdById": {
-          "name": "createdById",
+        "company_domain_unique": {
+          "name": "company_domain_unique",
+          "columns": [
+            "domain"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "gdpr-seeker_gdpr_request_interview": {
+      "name": "gdpr-seeker_gdpr_request_interview",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "requestId": {
+          "name": "requestId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "time": {
+          "name": "time",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "gdpr_request_interview_request_idx": {
+          "name": "gdpr_request_interview_request_idx",
+          "columns": [
+            "requestId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "gdpr-seeker_gdpr_request_interview_requestId_gdpr-seeker_gdpr_request_id_fk": {
+          "name": "gdpr-seeker_gdpr_request_interview_requestId_gdpr-seeker_gdpr_request_id_fk",
+          "tableFrom": "gdpr-seeker_gdpr_request_interview",
+          "tableTo": "gdpr-seeker_gdpr_request",
+          "columnsFrom": [
+            "requestId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "gdpr-seeker_gdpr_request_state": {
+      "name": "gdpr-seeker_gdpr_request_state",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "requestId": {
+          "name": "requestId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "state": {
+          "name": "state",
+          "type": "text(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "gdpr_request_state_request_idx": {
+          "name": "gdpr_request_state_request_idx",
+          "columns": [
+            "requestId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "gdpr-seeker_gdpr_request_state_requestId_gdpr-seeker_gdpr_request_id_fk": {
+          "name": "gdpr-seeker_gdpr_request_state_requestId_gdpr-seeker_gdpr_request_id_fk",
+          "tableFrom": "gdpr-seeker_gdpr_request_state",
+          "tableTo": "gdpr-seeker_gdpr_request",
+          "columnsFrom": [
+            "requestId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "gdpr-seeker_gdpr_request": {
+      "name": "gdpr-seeker_gdpr_request",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "companyId": {
+          "name": "companyId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "applicantEmail": {
+          "name": "applicantEmail",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dateOfBirth": {
+          "name": "dateOfBirth",
           "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
@@ -162,28 +387,41 @@
         }
       },
       "indexes": {
-        "created_by_idx": {
-          "name": "created_by_idx",
+        "gdpr_request_company_idx": {
+          "name": "gdpr_request_company_idx",
           "columns": [
-            "createdById"
+            "companyId"
           ],
           "isUnique": false
         },
-        "name_idx": {
-          "name": "name_idx",
+        "gdpr_request_user_idx": {
+          "name": "gdpr_request_user_idx",
           "columns": [
-            "name"
+            "userId"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "gdpr-seeker_post_createdById_gdpr-seeker_user_id_fk": {
-          "name": "gdpr-seeker_post_createdById_gdpr-seeker_user_id_fk",
-          "tableFrom": "gdpr-seeker_post",
+        "gdpr-seeker_gdpr_request_companyId_gdpr-seeker_company_id_fk": {
+          "name": "gdpr-seeker_gdpr_request_companyId_gdpr-seeker_company_id_fk",
+          "tableFrom": "gdpr-seeker_gdpr_request",
+          "tableTo": "gdpr-seeker_company",
+          "columnsFrom": [
+            "companyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "gdpr-seeker_gdpr_request_userId_gdpr-seeker_user_id_fk": {
+          "name": "gdpr-seeker_gdpr_request_userId_gdpr-seeker_user_id_fk",
+          "tableFrom": "gdpr-seeker_gdpr_request",
           "tableTo": "gdpr-seeker_user",
           "columnsFrom": [
-            "createdById"
+            "userId"
           ],
           "columnsTo": [
             "id"
