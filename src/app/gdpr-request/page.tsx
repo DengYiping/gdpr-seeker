@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { BackButton } from "~/app/_components/back-button";
 import { GdprRequestForm } from "~/app/_components/gdpr-request-form";
 
@@ -30,21 +30,26 @@ export default async function GdprRequestPage({
     redirect("/get-started");
   }
 
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0b132b] to-[#1c2541] text-white">
-      <div className="container mx-auto max-w-3xl px-6 py-20">
-        <div className="mb-6">
-          <BackButton />
-        </div>
-        <h1 className="mb-4 text-3xl font-extrabold tracking-tight">
-          Create GDPR Request
-        </h1>
-        <p className="text-white/80">Company: {company.name}</p>
-        <p className="text-white/60">Domain: {company.domain}</p>
-        <p className="text-white/60">GDPR Email: {company.gdprEmail}</p>
+  // Hydrate the latest request so the client form can prefill without refetch
+  await api.gdprRequest.getMyLatest.prefetch();
 
-        <GdprRequestForm company={company} userEmail={session.user?.email} />
-      </div>
-    </main>
+  return (
+    <HydrateClient>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0b132b] to-[#1c2541] text-white">
+        <div className="container mx-auto max-w-3xl px-6 py-20">
+          <div className="mb-6">
+            <BackButton />
+          </div>
+          <h1 className="mb-4 text-3xl font-extrabold tracking-tight">
+            Create GDPR Request
+          </h1>
+          <p className="text-white/80">Company: {company.name}</p>
+          <p className="text-white/60">Domain: {company.domain}</p>
+          <p className="text-white/60">GDPR Email: {company.gdprEmail}</p>
+
+          <GdprRequestForm company={company} userEmail={session.user?.email} />
+        </div>
+      </main>
+    </HydrateClient>
   );
 }
