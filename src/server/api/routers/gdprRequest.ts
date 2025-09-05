@@ -25,7 +25,7 @@ export const gdprRequestRouter = createTRPCRouter({
       .orderBy(desc(gdprRequests.createdAt))
       .limit(1);
     if (!rows[0]) return null;
-    const { firstName, lastName, phone, dateOfBirth } = rows[0]!;
+    const { firstName, lastName, phone, dateOfBirth } = rows[0];
     return { firstName, lastName, phone, dateOfBirth };
   }),
   create: protectedProcedure
