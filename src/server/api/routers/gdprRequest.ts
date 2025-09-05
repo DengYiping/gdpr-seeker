@@ -15,6 +15,8 @@ export const gdprRequestRouter = createTRPCRouter({
       z.object({
         companyId: z.number().int().positive(),
         position: z.string().min(1),
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
         applicantEmail: z.string().email(),
         phone: z.string().min(3),
         dateOfBirth: z.string().min(4),
@@ -43,6 +45,8 @@ export const gdprRequestRouter = createTRPCRouter({
           companyId: input.companyId,
           userId,
           position: input.position,
+          firstName: input.firstName,
+          lastName: input.lastName,
           applicantEmail: input.applicantEmail,
           phone: input.phone,
           dateOfBirth: input.dateOfBirth,
