@@ -1,0 +1,1 @@
+DROP TABLE `gdpr-seeker_post`;

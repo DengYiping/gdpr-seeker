@@ -10,27 +10,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = sqliteTableCreator((name) => `gdpr-seeker_${name}`);
 
-export const posts = createTable(
-  "post",
-  (d) => ({
-    id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: d.text({ length: 256 }),
-    createdById: d
-      .text({ length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: d
-      .integer({ mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
-  }),
-  (t) => [
-    index("created_by_idx").on(t.createdById),
-    index("name_idx").on(t.name),
-  ]
-);
-
 export const users = createTable("user", (d) => ({
   id: d
     .text({ length: 255 })
@@ -70,7 +49,7 @@ export const accounts = createTable(
       columns: [t.provider, t.providerAccountId],
     }),
     index("account_user_id_idx").on(t.userId),
-  ]
+  ],
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -87,7 +66,7 @@ export const sessions = createTable(
       .references(() => users.id),
     expires: d.integer({ mode: "timestamp" }).notNull(),
   }),
-  (t) => [index("session_userId_idx").on(t.userId)]
+  (t) => [index("session_userId_idx").on(t.userId)],
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -101,5 +80,5 @@ export const verificationTokens = createTable(
     token: d.text({ length: 255 }).notNull(),
     expires: d.integer({ mode: "timestamp" }).notNull(),
   }),
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })]
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );

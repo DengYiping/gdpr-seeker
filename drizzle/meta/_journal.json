@@ -8,6 +8,13 @@
       "when": 1757032713630,
       "tag": "0000_amazing_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1757033755291,
+      "tag": "0001_cynical_expediter",
+      "breakpoints": true
     }
   ]
 }
