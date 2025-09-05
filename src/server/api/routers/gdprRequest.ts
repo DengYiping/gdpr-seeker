@@ -10,6 +10,24 @@ import {
 } from "~/server/db/schema";
 
 export const gdprRequestRouter = createTRPCRouter({
+  getMyLatest: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const rows = await ctx.db
+      .select({
+        firstName: gdprRequests.firstName,
+        lastName: gdprRequests.lastName,
+        phone: gdprRequests.phone,
+        dateOfBirth: gdprRequests.dateOfBirth,
+        createdAt: gdprRequests.createdAt,
+      })
+      .from(gdprRequests)
+      .where(eq(gdprRequests.userId, userId))
+      .orderBy(desc(gdprRequests.createdAt))
+      .limit(1);
+    if (!rows[0]) return null;
+    const { firstName, lastName, phone, dateOfBirth } = rows[0]!;
+    return { firstName, lastName, phone, dateOfBirth };
+  }),
   create: protectedProcedure
     .input(
       z.object({

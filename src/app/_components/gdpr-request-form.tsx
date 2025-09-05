@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 
@@ -30,6 +30,20 @@ export function GdprRequestForm({
   >([{ type: "", time: "" }]);
 
   const utils = api.useUtils();
+  const { data: last } = api.gdprRequest.getMyLatest.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const [prefilled, setPrefilled] = useState(false);
+  useEffect(() => {
+    if (!prefilled && last) {
+      if (!firstName) setFirstName(last.firstName);
+      if (!lastName) setLastName(last.lastName);
+      if (!phone) setPhone(last.phone);
+      if (!dob) setDob(last.dateOfBirth);
+      setPrefilled(true);
+    }
+  }, [last, prefilled, firstName, lastName, phone, dob]);
   const createMutation = api.gdprRequest.create.useMutation({
     onSuccess: async () => {
       await utils.invalidate();
