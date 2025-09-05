@@ -55,6 +55,11 @@ export const authConfig = {
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  theme: {
+    colorScheme: "dark",
+    brandColor: "#3B82F6",
+    logo: "/favicon.ico",
+  },
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
