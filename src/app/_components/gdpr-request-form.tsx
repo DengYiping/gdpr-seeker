@@ -20,6 +20,8 @@ export function GdprRequestForm({
 }) {
   const router = useRouter();
   const [position, setPosition] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [applicantEmail, setApplicantEmail] = useState(userEmail ?? "");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
@@ -61,6 +63,8 @@ export function GdprRequestForm({
     const payload = {
       companyId: company.id,
       position,
+      firstName,
+      lastName,
       applicantEmail,
       phone,
       dateOfBirth: dob,
@@ -72,6 +76,28 @@ export function GdprRequestForm({
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm text-white/80">First name</label>
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full rounded-lg bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none"
+            placeholder="e.g., Jane"
+            required
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-white/80">Last name</label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="w-full rounded-lg bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none"
+            placeholder="e.g., Doe"
+            required
+          />
+        </div>
         <div>
           <label className="mb-1 block text-sm text-white/80">
             Position applied for

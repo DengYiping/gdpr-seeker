@@ -133,6 +133,8 @@ export const gdprRequests = createTable(
       .notNull()
       .references(() => users.id),
     position: d.text({ length: 255 }).notNull(),
+    firstName: d.text({ length: 255 }).notNull(),
+    lastName: d.text({ length: 255 }).notNull(),
     applicantEmail: d.text({ length: 255 }).notNull(),
     phone: d.text({ length: 255 }).notNull(),
     dateOfBirth: d.text({ length: 255 }).notNull(),
