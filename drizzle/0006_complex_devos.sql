@@ -1,0 +1,2 @@
+ALTER TABLE `gdpr-seeker_gdpr_request` ADD `firstName` text(255) DEFAULT 'Jane' NOT NULL;--> statement-breakpoint
+ALTER TABLE `gdpr-seeker_gdpr_request` ADD `lastName` text(255) DEFAULT 'Doe' NOT NULL;
