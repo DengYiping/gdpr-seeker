@@ -7,10 +7,10 @@ export default async function Home() {
         <header className="flex w-full items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-xl font-bold">
-              G
+              U
             </div>
             <span className="text-lg font-semibold tracking-wide">
-              GDPR Seeker
+              unghosted
             </span>
           </div>
           <nav className="flex items-center gap-4">
@@ -40,7 +40,7 @@ export default async function Home() {
             Take control of your interview data and request feedback
           </h1>
           <p className="max-w-2xl text-lg text-balance text-white/80">
-            GDPR Seeker helps candidates easily file GDPR data access and
+            unghosted helps candidates easily file GDPR data access and
             deletion requests to companies—especially after interviews—so you
             can understand decisions and request constructive feedback.
           </p>
@@ -107,13 +107,13 @@ export default async function Home() {
           <p className="mt-2 text-white/80">
             Many recruiters decline to provide feedback after interviews. Under
             GDPR, you have rights to access your data and understand automated
-            decisions. GDPR Seeker streamlines exercising those rights and
+            decisions. unghosted streamlines exercising those rights and
             increases your chances of receiving actionable feedback.
           </p>
         </section>
 
         <footer className="mt-4 w-full text-center text-sm text-white/60">
-          © {new Date().getFullYear()} GDPR Seeker. All rights reserved.
+          © {new Date().getFullYear()} unghosted. All rights reserved.
         </footer>
       </div>
     </main>
