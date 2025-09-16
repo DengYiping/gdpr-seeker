@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
@@ -18,6 +18,7 @@ export function CompanySearch({
   );
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Keep local input in sync if initialQuery changes due to navigation
@@ -57,13 +58,15 @@ export function CompanySearch({
 
   const hasQuery = prefix.trim().length > 0;
 
-  // Reflect the current query in the URL (?q=...)
+  // Reflect the current query in the URL (?q=...), but only when it actually changes
   useEffect(() => {
-    const q = prefix.trim();
+    const q = debouncedPrefix.trim();
+    const currentQ = (searchParams.get("q") ?? "").trim();
+    if (q === currentQ) return; // avoid redundant navigations
     const url = `${pathname}${q ? `?q=${encodeURIComponent(q)}` : ""}`;
     router.replace(url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefix, pathname]);
+  }, [debouncedPrefix, pathname]);
 
   return (
     <div className="w-full max-w-2xl">

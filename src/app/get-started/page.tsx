@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "~/server/auth";
+import { auth, signOut } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { CompanySearch } from "~/app/_components/company-search";
 
@@ -111,12 +111,19 @@ export default async function GetStartedPage({
             >
               Back to home
             </Link>
-            <Link
-              href="/api/auth/signout"
-              className="rounded-full bg-white/10 px-6 py-3 text-base font-semibold hover:bg-white/20"
+            <form
+              action={async () => {
+                "use server";
+                await signOut();
+              }}
             >
-              Sign out
-            </Link>
+              <button
+                type="submit"
+                className="rounded-full bg-white/10 px-6 py-3 text-base font-semibold hover:bg-white/20"
+              >
+                Sign out
+              </button>
+            </form>
           </div>
         </div>
       </main>

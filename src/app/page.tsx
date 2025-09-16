@@ -47,6 +47,7 @@ export default async function Home() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/get-started"
+              prefetch={false}
               className="rounded-full bg-blue-500 px-6 py-3 text-base font-semibold text-white shadow hover:bg-blue-400"
             >
               Get started
