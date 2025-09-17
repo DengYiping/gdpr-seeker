@@ -1,6 +1,4 @@
-"use client";
-
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { keepPreviousData } from "@tanstack/react-query";
 
@@ -9,7 +7,6 @@ import { AddCompanyButton } from "~/app/_components/add-company-button";
 
 export function CompanySearch() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const router = useRouter();
 
   const qFromUrl = (searchParams.get("q") ?? "").trim();
@@ -32,7 +29,7 @@ export function CompanySearch() {
     const term = value.trim();
     if (term) params.set("q", term);
     else params.delete("q");
-    router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`);
+    router.replace(params.size ? `?${params.toString()}` : "?");
   }, 300);
   const onChange = (value: string) => debouncedReplace(value);
 
@@ -69,7 +66,9 @@ export function CompanySearch() {
                       <button
                         type="button"
                         className="rounded-full bg-blue-500 px-4 py-1.5 font-semibold text-white hover:bg-blue-400"
-                        onClick={() => router.push(`/gdpr-request?companyId=${c.id}`)}
+                        onClick={() =>
+                          router.push(`/gdpr-request?companyId=${c.id}`)
+                        }
                       >
                         Create request
                       </button>
