@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { keepPreviousData } from "@tanstack/react-query";
+import Link from "next/link";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
@@ -13,17 +14,14 @@ export function CompanySearch() {
 
   const qFromUrl = (searchParams.get("q") ?? "").trim();
 
-  const { data } = api.company.searchByName.useQuery(
+  const hasQuery = qFromUrl.length > 0;
+
+  const { data: queryData } = api.company.searchByName.useQuery(
     { query: qFromUrl, limit: 10 },
-    {
-      enabled: qFromUrl.length > 0,
-      placeholderData: keepPreviousData,
-    },
+    { enabled: hasQuery, placeholderData: keepPreviousData },
   );
 
-  const rowsToRender = data ?? [];
-
-  const hasQuery = qFromUrl.length > 0;
+  const data = hasQuery ? (queryData ?? []) : [];
 
   // Follow Next.js tutorial pattern with use-debounce
   const debouncedReplace = useDebouncedCallback((value: string) => {
@@ -31,7 +29,9 @@ export function CompanySearch() {
     const term = value.trim();
     if (term) params.set("q", term);
     else params.delete("q");
-    const url = params.size ? `?${params.toString()}` : window.location.pathname;
+    const url = params.size
+      ? `?${params.toString()}`
+      : window.location.pathname;
     router.replace(url);
   }, 300);
   const onChange = (value: string) => debouncedReplace(value);
@@ -59,22 +59,19 @@ export function CompanySearch() {
               </tr>
             </thead>
             <tbody>
-              {rowsToRender?.length ? (
-                rowsToRender.map((c) => (
+              {data.length ? (
+                data.map((c) => (
                   <tr key={c.id} className="odd:bg-white/5">
                     <td className="px-4 py-2">{c.name}</td>
                     <td className="px-4 py-2">{c.domain}</td>
                     <td className="px-4 py-2">{c.gdprEmail}</td>
                     <td className="px-4 py-2">
-                      <button
-                        type="button"
+                      <Link
+                        href={`/gdpr-request?companyId=${c.id}`}
                         className="rounded-full bg-blue-500 px-4 py-1.5 font-semibold text-white hover:bg-blue-400"
-                        onClick={() =>
-                          router.push(`/gdpr-request?companyId=${c.id}`)
-                        }
                       >
                         Create request
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

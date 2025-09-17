@@ -5,7 +5,11 @@ import { auth, signOut } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { CompanySearch } from "~/app/_components/company-search";
 
-export default async function GetStartedPage() {
+export default async function GetStartedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await auth();
 
   if (!session) {
@@ -16,7 +20,21 @@ export default async function GetStartedPage() {
   }
 
   const name = session.user?.name ?? "there";
-  const requests = await api.gdprRequest.listMine();
+  const qFromUrl = ((await searchParams).q ?? "").trim();
+
+  const listMinePromise = api.gdprRequest.listMine();
+  let searchByNamePromiseMaybe: Promise<void> | undefined;
+
+  if (qFromUrl.length > 0) {
+    searchByNamePromiseMaybe = api.company.searchByName.prefetch({
+      query: qFromUrl,
+      limit: 10,
+    });
+  }
+  const requests = await listMinePromise;
+  if (searchByNamePromiseMaybe) {
+    await searchByNamePromiseMaybe;
+  }
   const inProgress = requests.filter((r) => r.latestState !== "DONE");
 
   return (
