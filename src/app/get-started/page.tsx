@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { auth, signOut } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-import { CompanySearch } from "~/app/_components/company-search";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,13 +14,28 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  CompanySearchResults,
+  CompanySearchResultsSpinner,
+} from "../_components/company-search-results";
+import { AddCompanyButton } from "../_components/add-company-button";
+import { CompanySearchBar } from "../_components/company-search-bar";
+import { Suspense } from "react";
 
-export default async function GetStartedPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
+export default async function GetStartedPage(props: {
+  searchParams?: Promise<{ q?: string }>;
 }) {
-  const session = await auth();
+  const sessionPromise = auth();
+  const searchParamsPromise = props.searchParams;
+  const listMinePromise = api.gdprRequest.listMine();
+
+  const [session, searchParams, requests] = await Promise.all([
+    sessionPromise,
+    searchParamsPromise,
+    listMinePromise,
+  ]);
+
+  const query = searchParams?.q ?? "";
 
   if (!session) {
     // Redirect to custom sign-in and return to this page after login
@@ -29,21 +43,7 @@ export default async function GetStartedPage({
   }
 
   const name = session.user?.name ?? "there";
-  const qFromUrl = ((await searchParams).q ?? "").trim();
 
-  const listMinePromise = api.gdprRequest.listMine();
-  let searchByNamePromiseMaybe: Promise<void> | undefined;
-
-  if (qFromUrl.length > 0) {
-    searchByNamePromiseMaybe = api.company.searchByName.prefetch({
-      query: qFromUrl,
-      limit: 10,
-    });
-  }
-  const requests = await listMinePromise;
-  if (searchByNamePromiseMaybe) {
-    await searchByNamePromiseMaybe;
-  }
   const inProgress = requests.filter((r) => r.latestState !== "DONE");
 
   return (
@@ -112,7 +112,25 @@ export default async function GetStartedPage({
             </div>
           )}
           <div className="w-full pt-2">
-            <CompanySearch />
+            <div className="w-full max-w-2xl">
+              <div className="flex items-center gap-2">
+                <CompanySearchBar defaultValue={query} />
+              </div>
+
+              {query && (
+                <div className="mt-4 rounded-xl border">
+                  <Suspense
+                    fallback={<CompanySearchResultsSpinner />}
+                    key={query}
+                  >
+                    <CompanySearchResults query={query} />
+                  </Suspense>
+                  <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
+                    <AddCompanyButton />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button asChild variant="outline">
