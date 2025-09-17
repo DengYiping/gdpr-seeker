@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
+import { keepPreviousData } from "@tanstack/react-query";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
@@ -11,52 +11,29 @@ export function CompanySearch() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
-    null,
-  );
-
-  // Initialize once from URL; avoid syncing afterward to prevent overwriting.
 
   const qFromUrl = (searchParams.get("q") ?? "").trim();
 
-  const { data, isFetching } = api.company.searchByName.useQuery(
+  const { data } = api.company.searchByName.useQuery(
     { query: qFromUrl, limit: 10 },
     {
       enabled: qFromUrl.length > 0,
+      placeholderData: keepPreviousData,
     },
   );
 
-  const lastSuccessfulDataRef = useRef<typeof data | null>(null);
-  useEffect(() => {
-    if (data) lastSuccessfulDataRef.current = data;
-  }, [data]);
-
-  const rowsToRender = useMemo(() => {
-    if (data && data.length > 0) return data;
-    if (isFetching && lastSuccessfulDataRef.current)
-      return lastSuccessfulDataRef.current;
-    return data ?? [];
-  }, [data, isFetching]);
-
-  useEffect(() => {
-    if (selectedCompanyId == null) return;
-    const stillExists = rowsToRender.some((c) => c.id === selectedCompanyId);
-    if (!stillExists) setSelectedCompanyId(null);
-  }, [rowsToRender, selectedCompanyId]);
+  const rowsToRender = data ?? [];
 
   const hasQuery = qFromUrl.length > 0;
 
   // Follow Next.js tutorial pattern with use-debounce
-  const debouncedReplace = useDebouncedCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams);
-      const term = value.trim();
-      if (term) params.set("q", term);
-      else params.delete("q");
-      router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`);
-    },
-    300,
-  );
+  const debouncedReplace = useDebouncedCallback((value: string) => {
+    const params = new URLSearchParams(searchParams);
+    const term = value.trim();
+    if (term) params.set("q", term);
+    else params.delete("q");
+    router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`);
+  }, 300);
   const onChange = (value: string) => debouncedReplace(value);
 
   return (
@@ -75,28 +52,28 @@ export function CompanySearch() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-white/10 text-white/80">
               <tr>
-                <th className="px-4 py-2">Select</th>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Domain</th>
                 <th className="px-4 py-2">GDPR Email</th>
+                <th className="px-4 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {rowsToRender?.length ? (
                 rowsToRender.map((c) => (
                   <tr key={c.id} className="odd:bg-white/5">
-                    <td className="px-4 py-2 align-middle">
-                      <input
-                        type="radio"
-                        name="companySelect"
-                        checked={selectedCompanyId === c.id}
-                        onChange={() => setSelectedCompanyId(c.id)}
-                        aria-label={`Select ${c.name}`}
-                      />
-                    </td>
                     <td className="px-4 py-2">{c.name}</td>
                     <td className="px-4 py-2">{c.domain}</td>
                     <td className="px-4 py-2">{c.gdprEmail}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        type="button"
+                        className="rounded-full bg-blue-500 px-4 py-1.5 font-semibold text-white hover:bg-blue-400"
+                        onClick={() => router.push(`/gdpr-request?companyId=${c.id}`)}
+                      >
+                        Create request
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -111,17 +88,6 @@ export function CompanySearch() {
 
           <div className="flex items-center justify-end gap-3 border-t border-white/10 bg-white/5 px-4 py-3">
             <AddCompanyButton />
-            <button
-              type="button"
-              className="rounded-full bg-blue-500 px-5 py-2 font-semibold text-white hover:bg-blue-400 disabled:opacity-60"
-              disabled={!selectedCompanyId}
-              onClick={() => {
-                if (!selectedCompanyId) return;
-                router.push(`/gdpr-request?companyId=${selectedCompanyId}`);
-              }}
-            >
-              Create a GDPR request
-            </button>
           </div>
         </div>
       )}
