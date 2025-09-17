@@ -5,11 +5,7 @@ import { auth, signOut } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { CompanySearch } from "~/app/_components/company-search";
 
-export default async function GetStartedPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
+export default async function GetStartedPage() {
   const session = await auth();
 
   if (!session) {
@@ -20,14 +16,8 @@ export default async function GetStartedPage({
   }
 
   const name = session.user?.name ?? "there";
-  const { q } = await searchParams;
   const requests = await api.gdprRequest.listMine();
   const inProgress = requests.filter((r) => r.latestState !== "DONE");
-
-  const initialQuery = (q ?? "").trim();
-  if (initialQuery.length > 0) {
-    await api.company.searchByName.prefetch({ query: initialQuery, limit: 10 });
-  }
 
   return (
     <HydrateClient>
@@ -102,7 +92,7 @@ export default async function GetStartedPage({
             </div>
           )}
           <div className="w-full pt-2">
-            <CompanySearch initialQuery={q ?? ""} />
+            <CompanySearch />
           </div>
           <div className="flex items-center gap-3">
             <Link

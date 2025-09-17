@@ -1,27 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
 
-export function CompanySearch({
-  initialQuery = "",
-}: {
-  initialQuery?: string;
-}) {
-  const [prefix, setPrefix] = useState(initialQuery);
-  const [debouncedPrefix, setDebouncedPrefix] = useState(initialQuery);
+export function CompanySearch() {
+  const searchParams = useSearchParams();
+  const initialQ = (searchParams.get("q") ?? "").trim();
+  const [prefix, setPrefix] = useState(initialQ);
+  const [debouncedPrefix, setDebouncedPrefix] = useState(initialQ);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
     null,
   );
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  // Initialize from initialQuery on first render; avoid syncing on later
-  // navigations to prevent the input from being overwritten mid-typing.
+  // Initialize once from URL; avoid syncing afterward to prevent overwriting.
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedPrefix(prefix.trim()), 250);
@@ -55,15 +50,8 @@ export function CompanySearch({
 
   const hasQuery = prefix.trim().length > 0;
 
-  // Reflect the current query in the URL (?q=...), but only when it actually changes
-  useEffect(() => {
-    const q = debouncedPrefix.trim();
-    const currentQ = (searchParams.get("q") ?? "").trim();
-    if (q === currentQ) return; // avoid redundant navigations
-    const url = `${pathname}${q ? `?q=${encodeURIComponent(q)}` : ""}`;
-    router.replace(url);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPrefix, pathname, searchParams]);
+  // Do not sync the search query back to the URL on every keystroke to
+  // avoid triggering server re-renders of the page.
 
   return (
     <div className="w-full max-w-2xl">
