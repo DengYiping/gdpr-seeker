@@ -55,6 +55,9 @@ export const authConfig = {
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  pages: {
+    signIn: "/sign-in",
+  },
   theme: {
     colorScheme: "dark",
     brandColor: "#3B82F6",
