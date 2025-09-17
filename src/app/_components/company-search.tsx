@@ -20,11 +20,8 @@ export function CompanySearch({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    // Keep local input in sync if initialQuery changes due to navigation
-    setPrefix(initialQuery);
-    setDebouncedPrefix(initialQuery);
-  }, [initialQuery]);
+  // Initialize from initialQuery on first render; avoid syncing on later
+  // navigations to prevent the input from being overwritten mid-typing.
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedPrefix(prefix.trim()), 250);
@@ -66,7 +63,7 @@ export function CompanySearch({
     const url = `${pathname}${q ? `?q=${encodeURIComponent(q)}` : ""}`;
     router.replace(url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPrefix, pathname]);
+  }, [debouncedPrefix, pathname, searchParams]);
 
   return (
     <div className="w-full max-w-2xl">
