@@ -8,6 +8,9 @@ import "./src/env.js";
 const config = {
   // Reduce dev-only double-invocations that can cause extra server logs
   reactStrictMode: false,
+  experimental: {
+    ppr: true,
+  },
 };
 
 export default config;

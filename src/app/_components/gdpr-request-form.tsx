@@ -8,7 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 type CompanySummary = {
@@ -119,9 +123,7 @@ export function GdprRequestForm({
       applicantEmail,
       phone,
       dateOfBirth: dob
-        ? new Date(
-            Date.UTC(dob.getFullYear(), dob.getMonth(), dob.getDate()),
-          )
+        ? new Date(Date.UTC(dob.getFullYear(), dob.getMonth(), dob.getDate()))
             .toISOString()
             .slice(0, 10)
         : "",

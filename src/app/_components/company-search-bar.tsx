@@ -11,7 +11,7 @@ export function CompanySearchBar(props: { defaultValue?: string }) {
 
   return (
     <Input
-      defaultValue={defaultValue}
+      defaultValue={defaultValue ?? searchParams?.get("q") ?? ""}
       onChange={(e) => {
         const params = new URLSearchParams(searchParams ?? "");
         if (e.target.value) {

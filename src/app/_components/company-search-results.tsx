@@ -1,9 +1,6 @@
-"use client";
-
-import { keepPreviousData } from "@tanstack/react-query";
+import { api } from "~/trpc/server";
 import Link from "next/link";
 
-import { api } from "~/trpc/react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,13 +12,10 @@ import {
 } from "@/components/ui/table";
 import { Spinner } from "~/components/ui/shadcn-io/spinner";
 
-export function CompanySearchResults({ query }: { query: string }) {
+export async function CompanySearchResults({ query }: { query: string }) {
   const hasQuery = query.trim().length > 0;
 
-  const { data: queryData } = api.company.searchByName.useQuery(
-    { query, limit: 10 },
-    { enabled: hasQuery, placeholderData: keepPreviousData, suspense: true },
-  );
+  const queryData = await api.company.searchByName({ query, limit: 10 });
 
   const data = hasQuery ? (queryData ?? []) : [];
 

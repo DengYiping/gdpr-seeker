@@ -89,9 +89,6 @@ export const companyRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // artificial delay in dev
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       const pattern = `%${input.query}%`;
       const rows = await ctx.db
         .select()

@@ -31,12 +31,9 @@ export default async function GdprRequestPage({
     redirect("/get-started");
   }
 
-  // Hydrate the latest request so the client form can prefill without refetch
-  await api.gdprRequest.getMyLatest.prefetch();
-
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
+      <main className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center">
         <div className="container mx-auto max-w-3xl px-6 py-20">
           <div className="mb-6">
             <BackButton />
@@ -46,7 +43,7 @@ export default async function GdprRequestPage({
               <CardTitle>Create GDPR Request</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 text-sm text-muted-foreground">
+              <div className="text-muted-foreground mb-4 text-sm">
                 <div>Company: {company.name}</div>
                 <div>Domain: {company.domain}</div>
                 <div>GDPR Email: {company.gdprEmail}</div>
