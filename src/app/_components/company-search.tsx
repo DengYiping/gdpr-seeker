@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -29,7 +31,8 @@ export function CompanySearch() {
     const term = value.trim();
     if (term) params.set("q", term);
     else params.delete("q");
-    router.replace(params.size ? `?${params.toString()}` : "?");
+    const url = params.size ? `?${params.toString()}` : window.location.pathname;
+    router.replace(url);
   }, 300);
   const onChange = (value: string) => debouncedReplace(value);
 
