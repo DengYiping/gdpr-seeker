@@ -1,32 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
 
 export function CompanySearch() {
   const searchParams = useSearchParams();
-  const initialQ = (searchParams.get("q") ?? "").trim();
-  const [prefix, setPrefix] = useState(initialQ);
-  const [debouncedPrefix, setDebouncedPrefix] = useState(initialQ);
+  const pathname = usePathname();
+  const router = useRouter();
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
     null,
   );
-  const router = useRouter();
 
   // Initialize once from URL; avoid syncing afterward to prevent overwriting.
 
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedPrefix(prefix.trim()), 250);
-    return () => clearTimeout(id);
-  }, [prefix]);
+  const qFromUrl = (searchParams.get("q") ?? "").trim();
 
   const { data, isFetching } = api.company.searchByName.useQuery(
-    { query: debouncedPrefix, limit: 10 },
+    { query: qFromUrl, limit: 10 },
     {
-      enabled: debouncedPrefix.length > 0,
+      enabled: qFromUrl.length > 0,
     },
   );
 
@@ -48,17 +43,28 @@ export function CompanySearch() {
     if (!stillExists) setSelectedCompanyId(null);
   }, [rowsToRender, selectedCompanyId]);
 
-  const hasQuery = prefix.trim().length > 0;
+  const hasQuery = qFromUrl.length > 0;
 
-  // Do not sync the search query back to the URL on every keystroke to
-  // avoid triggering server re-renders of the page.
+  // Follow Next.js tutorial pattern: manage search via URL params with a
+  // debounced replace, and keep the input uncontrolled via defaultValue.
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onChange = (value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams);
+      const term = value.trim();
+      if (term) params.set("q", term);
+      else params.delete("q");
+      router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`);
+    }, 300);
+  };
 
   return (
     <div className="w-full max-w-2xl">
       <div className="flex items-center gap-2">
         <input
-          value={prefix}
-          onChange={(e) => setPrefix(e.target.value)}
+          defaultValue={qFromUrl}
+          onChange={(e) => onChange(e.target.value)}
           placeholder="Fuzzy search companies by name (e.g., 'mic soft' → Microsoft)"
           className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2 text-white placeholder-white/60"
         />
