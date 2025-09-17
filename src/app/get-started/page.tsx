@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "~/server/auth";
+import { auth, signOut } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { CompanySearch } from "~/app/_components/company-search";
 
@@ -20,14 +20,22 @@ export default async function GetStartedPage({
   }
 
   const name = session.user?.name ?? "there";
-  const { q } = await searchParams;
-  const requests = await api.gdprRequest.listMine();
-  const inProgress = requests.filter((r) => r.latestState !== "DONE");
+  const qFromUrl = ((await searchParams).q ?? "").trim();
 
-  const initialQuery = (q ?? "").trim();
-  if (initialQuery.length > 0) {
-    await api.company.searchByName.prefetch({ query: initialQuery, limit: 10 });
+  const listMinePromise = api.gdprRequest.listMine();
+  let searchByNamePromiseMaybe: Promise<void> | undefined;
+
+  if (qFromUrl.length > 0) {
+    searchByNamePromiseMaybe = api.company.searchByName.prefetch({
+      query: qFromUrl,
+      limit: 10,
+    });
   }
+  const requests = await listMinePromise;
+  if (searchByNamePromiseMaybe) {
+    await searchByNamePromiseMaybe;
+  }
+  const inProgress = requests.filter((r) => r.latestState !== "DONE");
 
   return (
     <HydrateClient>
@@ -102,7 +110,7 @@ export default async function GetStartedPage({
             </div>
           )}
           <div className="w-full pt-2">
-            <CompanySearch initialQuery={q ?? ""} />
+            <CompanySearch />
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -111,12 +119,19 @@ export default async function GetStartedPage({
             >
               Back to home
             </Link>
-            <Link
-              href="/api/auth/signout"
-              className="rounded-full bg-white/10 px-6 py-3 text-base font-semibold hover:bg-white/20"
+            <form
+              action={async () => {
+                "use server";
+                await signOut();
+              }}
             >
-              Sign out
-            </Link>
+              <button
+                type="submit"
+                className="rounded-full bg-white/10 px-6 py-3 text-base font-semibold hover:bg-white/20"
+              >
+                Sign out
+              </button>
+            </form>
           </div>
         </div>
       </main>
