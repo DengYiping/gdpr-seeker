@@ -5,6 +5,9 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  // Reduce dev-only double-invocations that can cause extra server logs
+  reactStrictMode: false,
+};
 
 export default config;
