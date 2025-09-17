@@ -48,9 +48,11 @@ export default async function GetStartedPage({
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
+      <main className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center">
         <div className="container mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-20 text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight">Welcome, {name}!</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            Welcome, {name}!
+          </h1>
           {inProgress.length > 0 && (
             <div className="w-full text-left">
               <Card>
@@ -76,14 +78,15 @@ export default async function GetStartedPage({
                           "DONE",
                         ] as const;
                         const currentIdx = steps.indexOf(r.latestState);
-                        const progress = ((currentIdx + 1) / steps.length) * 100;
+                        const progress =
+                          ((currentIdx + 1) / steps.length) * 100;
                         return (
                           <TableRow key={r.id}>
                             <TableCell>{r.companyName}</TableCell>
                             <TableCell>{r.position}</TableCell>
                             <TableCell>
                               <div className="flex flex-col gap-1">
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-muted-foreground text-xs">
                                   {r.latestState}
                                 </span>
                                 <div className="w-48">
@@ -118,7 +121,7 @@ export default async function GetStartedPage({
             <form
               action={async () => {
                 "use server";
-                await signOut();
+                await signOut({ redirectTo: "/" });
               }}
             >
               <Button type="submit" variant="ghost">
