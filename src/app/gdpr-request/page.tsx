@@ -3,6 +3,7 @@ import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import { BackButton } from "~/app/_components/back-button";
 import { GdprRequestForm } from "~/app/_components/gdpr-request-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function GdprRequestPage({
   searchParams,
@@ -13,7 +14,7 @@ export default async function GdprRequestPage({
   const session = await auth();
   if (!session) {
     redirect(
-      `/api/auth/signin?callbackUrl=${encodeURIComponent("/gdpr-request" + (companyId ? `?companyId=${companyId}` : ""))}`,
+      `/sign-in?callbackUrl=${encodeURIComponent("/gdpr-request" + (companyId ? `?companyId=${companyId}` : ""))}`,
     );
   }
   if (!companyId) {
@@ -35,19 +36,27 @@ export default async function GdprRequestPage({
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0b132b] to-[#1c2541] text-white">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
         <div className="container mx-auto max-w-3xl px-6 py-20">
           <div className="mb-6">
             <BackButton />
           </div>
-          <h1 className="mb-4 text-3xl font-extrabold tracking-tight">
-            Create GDPR Request
-          </h1>
-          <p className="text-white/80">Company: {company.name}</p>
-          <p className="text-white/60">Domain: {company.domain}</p>
-          <p className="text-white/60">GDPR Email: {company.gdprEmail}</p>
-
-          <GdprRequestForm company={company} userEmail={session.user?.email} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Create GDPR Request</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 text-sm text-muted-foreground">
+                <div>Company: {company.name}</div>
+                <div>Domain: {company.domain}</div>
+                <div>GDPR Email: {company.gdprEmail}</div>
+              </div>
+              <GdprRequestForm
+                company={company}
+                userEmail={session.user?.email}
+              />
+            </CardContent>
+          </Card>
         </div>
       </main>
     </HydrateClient>
