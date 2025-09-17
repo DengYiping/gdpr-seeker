@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 
 import { api } from "~/trpc/react";
 import { AddCompanyButton } from "~/app/_components/add-company-button";
@@ -45,19 +46,18 @@ export function CompanySearch() {
 
   const hasQuery = qFromUrl.length > 0;
 
-  // Follow Next.js tutorial pattern: manage search via URL params with a
-  // debounced replace, and keep the input uncontrolled via defaultValue.
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onChange = (value: string) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
+  // Follow Next.js tutorial pattern with use-debounce
+  const debouncedReplace = useDebouncedCallback(
+    (value: string) => {
       const params = new URLSearchParams(searchParams);
       const term = value.trim();
       if (term) params.set("q", term);
       else params.delete("q");
       router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`);
-    }, 300);
-  };
+    },
+    300,
+  );
+  const onChange = (value: string) => debouncedReplace(value);
 
   return (
     <div className="w-full max-w-2xl">
