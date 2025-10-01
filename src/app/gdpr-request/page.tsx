@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "~/server/auth";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { api, HydrateClient } from "~/trpc/server";
 import { BackButton } from "~/app/_components/back-button";
 import { GdprRequestForm } from "~/app/_components/gdpr-request-form";
@@ -12,9 +12,9 @@ export default async function GdprRequestPage({
 }) {
   const { companyId } = await searchParams;
   const session = await auth();
-  if (!session) {
+  if (!session.isAuthenticated) {
     redirect(
-      `/sign-in?callbackUrl=${encodeURIComponent("/gdpr-request" + (companyId ? `?companyId=${companyId}` : ""))}`,
+      `/sign-in?redirect_url=${encodeURIComponent("/gdpr-request" + (companyId ? `?companyId=${companyId}` : ""))}`,
     );
   }
   if (!companyId) {
@@ -26,6 +26,7 @@ export default async function GdprRequestPage({
     redirect("/get-started");
   }
 
+  const user = await currentUser();
   const company = await api.company.getById({ id: idNum });
   if (!company) {
     redirect("/get-started");
@@ -50,7 +51,7 @@ export default async function GdprRequestPage({
               </div>
               <GdprRequestForm
                 company={company}
-                userEmail={session.user?.email}
+                userEmail={user?.emailAddresses[0]?.emailAddress ?? null}
               />
             </CardContent>
           </Card>

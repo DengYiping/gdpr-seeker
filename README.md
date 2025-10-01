@@ -1,12 +1,12 @@
 # GDPR Seeker
 
-GDPR Seeker helps candidates generate and track GDPR data access/deletion requests after interviews. Built on Next.js App Router with tRPC, Drizzle ORM (Turso/libSQL), and NextAuth.
+GDPR Seeker helps candidates generate and track GDPR data access/deletion requests after interviews. Built on Next.js App Router with tRPC, Drizzle ORM (Turso/libSQL), and Clerk.
 
 ## Tech Stack
 
 - Next.js 15 (App Router) + React 19
 - TypeScript
-- Authentication: NextAuth v5 (Discord provider) with Drizzle adapter
+- Authentication: Clerk (hosted auth + components)
 - API: tRPC v11 + SuperJSON, TanStack Query v5
 - Database: Drizzle ORM (SQLite dialect via Turso/libSQL)
 - Styling: Tailwind CSS v4
@@ -27,7 +27,6 @@ src/
       gdpr-request-form.tsx     # Form to submit a GDPR request
       back-button.tsx
     api/
-      auth/[...nextauth]/route.ts    # NextAuth route handler
       trpc/[trpc]/route.ts           # tRPC fetch adapter endpoint
 
   server/
@@ -37,9 +36,6 @@ src/
         gdprRequest.ts          # Create, list, and state of requests
       trpc.ts                   # tRPC init, context, procedures
       root.ts                   # App router composition
-    auth/
-      config.ts                 # NextAuth config (Discord, adapter)
-      index.ts                  # Exports auth, handlers, signIn/out
     db/
       schema.ts                 # All tables and relations
       index.ts                  # Drizzle + libsql client
@@ -61,7 +57,6 @@ package.json                      # Scripts and dependencies
 ### Data Model (Drizzle / SQLite)
 
 - `companies`: name, domain, gdprEmail, verified
-- `users`, `accounts`, `sessions`, `verification_tokens`: NextAuth tables
 - `admin_users`: whitelist of admin user IDs
 - `gdpr_request`: per-user requests (company, personal info)
 - `gdpr_request_interview`: interviews attached to a request
@@ -74,10 +69,10 @@ Only verified companies are searchable/usable. Users can suggest companies; admi
 - `company` router: `getById`, `create`, `listUnverified` (admin), `verify` (admin), `remove` (admin), `searchByName`
 - `gdprRequest` router: `getMyLatest` (prefill), `create`, `getState`, `listMine`
 
-### Auth (NextAuth v5)
+### Auth (Clerk)
 
-- Discord provider; Drizzle adapter persists users/sessions in the same DB.
-- Route handler at `src/app/api/auth/[...nextauth]/route.ts`.
+- Authentication flows are handled by Clerk's hosted UI via `ClerkProvider`.
+- Sign-in page: `src/app/sign-in/page.tsx`. OAuth redirects finalize at `src/app/sign-in/sso-callback/page.tsx`.
 
 ## Getting Started
 
@@ -98,17 +93,16 @@ pnpm install
 Create `.env.local` (or `.env`) in the project root with:
 
 ```
-# NextAuth
-AUTH_SECRET= # required in production (generate with `openssl rand -base64 32`)
-AUTH_DISCORD_ID=
-AUTH_DISCORD_SECRET=
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 
 # Database (Turso / libSQL)
 TURSO_DATABASE_URL=
 TURSO_AUTH_TOKEN=
 ```
 
-Values must match the schema in `src/env.js`. In development, `AUTH_SECRET` is optional, but Discord OAuth requires `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET`.
+Values must match the schema in `src/env.js`.
 
 ### 3) Initialize the database
 
@@ -168,8 +162,7 @@ You can run this via `pnpm db:studio` or your DB console.
 ## Deployment Notes
 
 - Set all env vars in your host (e.g., Vercel). Ensure the Turso/libSQL endpoint is reachable from your runtime.
-- Use the same DB for NextAuth tables.
-- Configure OAuth callback URLs for Discord to match your deployment domain.
+- Provide Clerk publishable + secret keys and configure redirect URLs in the Clerk dashboard to match your deployment domain.
 
 ## License
 
