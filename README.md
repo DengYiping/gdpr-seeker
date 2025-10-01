@@ -80,7 +80,9 @@ Only verified companies are searchable/usable. Users can suggest companies; admi
 
 - Node.js 18.18+ (recommended: Node 20 LTS)
 - pnpm 10+ (`corepack enable` or `npm i -g pnpm`)
+- Active Clerk project with publishable + secret keys (https://clerk.com)
 - Turso/libSQL database (or compatible libsql endpoint)
+- Vercel CLI (`npm i -g vercel`) if you plan to sync env vars from Vercel
 
 ### 1) Install dependencies
 
@@ -103,6 +105,14 @@ TURSO_AUTH_TOKEN=
 ```
 
 Values must match the schema in `src/env.js`.
+
+If you manage configuration through Vercel, pull the remote environment into your local file after logging in:
+
+```
+vercel env pull .env.local
+```
+
+Update Clerk redirect URLs in the Clerk dashboard to include your local and deployed domains (e.g. `http://localhost:3000` and your Vercel preview/production URLs).
 
 ### 3) Initialize the database
 
