@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { auth } from "~/server/auth";
+import { auth } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function AdminPage() {
   const session = await auth();
-  if (!session) {
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent("/admin")}`);
+  if (!session.isAuthenticated) {
+    redirect(`/sign-in?redirect_url=${encodeURIComponent("/admin")}`);
   }
 
   // verify frontend guard by calling listUnverified; it will throw if not admin
@@ -40,7 +40,7 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
+    <main className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center">
       <div className="container mx-auto max-w-3xl px-6 py-20">
         <Card>
           <CardHeader>
@@ -64,12 +64,18 @@ export default async function AdminPage() {
                       <TableCell>{c.domain}</TableCell>
                       <TableCell>{c.gdprEmail}</TableCell>
                       <TableCell>
-                        <form action={verify.bind(null, c.id)} className="inline">
+                        <form
+                          action={verify.bind(null, c.id)}
+                          className="inline"
+                        >
                           <Button size="sm" className="mr-2">
                             Verify
                           </Button>
                         </form>
-                        <form action={removeCompany.bind(null, c.id)} className="inline">
+                        <form
+                          action={removeCompany.bind(null, c.id)}
+                          className="inline"
+                        >
                           <Button size="sm" variant="destructive">
                             Delete
                           </Button>

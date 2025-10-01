@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth, signOut } from "~/server/auth";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { HydrateClient } from "~/trpc/server";
 import { Button } from "@/components/ui/button";
 import { CompanySearchSection } from "../_components/company-search-section";
@@ -10,18 +10,19 @@ import {
   GdprRequestsInProgressSpinner,
 } from "../_components/gdpr-requests-in-progress";
 import { Suspense } from "react";
+import { SignOutClientButton } from "../_components/sign-out-client-button";
 
 export default async function GetStartedPage(props: {
   searchParams?: Promise<{ q?: string }>;
 }) {
-  const session = await auth();
+  const { userId } = await auth();
 
-  if (!session) {
-    // Redirect to custom sign-in and return to this page after login
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent("/get-started")}`);
+  if (!userId) {
+    redirect(`/sign-in?redirect_url=${encodeURIComponent("/get-started")}`);
   }
 
-  const name = session.user?.name ?? "there";
+  const user = await currentUser();
+  const name = user?.firstName ?? user?.username ?? user?.fullName ?? "there";
 
   return (
     <HydrateClient>
@@ -38,16 +39,7 @@ export default async function GetStartedPage(props: {
             <Button asChild variant="outline">
               <Link href="/">Back to home</Link>
             </Button>
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
-              <Button type="submit" variant="ghost">
-                Sign out
-              </Button>
-            </form>
+            <SignOutClientButton />
           </div>
         </div>
       </main>
